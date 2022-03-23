@@ -5,26 +5,81 @@ Client::Client(QWidget *parent) : QMainWindow(parent)
     ui.setupUi(this);
     connect(ui.buttonDisplayImage, SIGNAL(clicked(bool)), this, SLOT(buttonDisplayImageClicked()));
     connect(ui.buttonSendImage, SIGNAL(clicked(bool)), this, SLOT(buttonSendImageClicked()));
-    socket = new QTcpSocket(this);
+    //ui.textEdit->setText("1.PNG");
+}
+
+Client::~Client() {
+    delete socket;
 }
 
 void Client::buttonDisplayImageClicked() {
     ui.labelForImage->setText("the buttonDisplayImage has been clicked !");
     QString pathToImage = ui.textEdit->toPlainText();
-    QPixmap pixMap;
-    if (pixMap.load(pathToImage)) {
+    //ui.labelForImage->setText(pathToImage);
+    if (image.load(pathToImage)) {
         // Loaded !
-        ui.labelForImage->setPixmap(pixMap);
+        ui.labelForImage->setPixmap(image);
     }
     else {
         // Can't load file
+        image = QPixmap();
         ui.labelForImage->setText("Can't open Image!");
     }
 }
 
 void Client::buttonSendImageClicked() {
     ui.labelForImage->setText("the buttonDisplayImage has been clicked !");
-    runConnection();
+    socket = new QTcpSocket(this);
+    socket->connectToHost("127.0.0.1", 1234);//localhost
+
+    //showInTextEdit(this->bytesArray);
+ 
+    QString pathToImage = ui.textEdit->toPlainText();
+    if (image.load(pathToImage)) {
+        // Loaded !
+        ui.labelForImage->setPixmap(image);
+
+        //From QPixmap TO QByteArray
+        bytesArray.clear();
+        QBuffer buffer(&bytesArray);
+        buffer.open(QIODevice::WriteOnly);
+        image.save(&buffer, "PNG");//, "png", 0
+        bytesArray = buffer.data();
+
+        showInTextEdit(this->bytesArray.toBase64());
+
+        if (socket->waitForConnected(3000)) {
+            qDebug() << "Connected";
+
+            //send
+            socket->write(bytesArray);
+            socket->waitForBytesWritten(10000);
+            //socket->write("\r\nhello, server!\r\n");
+
+            //socket->waitForBytesWritten();
+            //socket->waitForReadyRead(3000);
+            //qDebug() << "Reading: " << socket->bytesAvailable();
+            //qDebug() << "readAll: ";
+            //QByteArray responce = socket->readAll();
+            //qDebug() << responce;
+            //showInTextEdit(responce);
+            //closing
+            //socket->close();
+        }
+        else {
+            // Not Connected
+            showInTextEdit("Not Connected\n");
+            qDebug() << "Not Connected";
+        }
+    }
+    else {
+        // Can't load file
+        image = QPixmap();
+        ui.labelForImage->setText("Can't open Image!");
+    }
+    // Preparation of our QPixmap QByteArray bArray;
+
+    //runConnection();
 }
 
 void Client::runConnection() {
@@ -64,12 +119,13 @@ void Client::showInTextEdit(QByteArray& bytesArray) {
     ui.textEdit->setFont(ui.textEdit->font());
 
     ui.textEdit->append("readed data size:");
-    QString size_of_bytesArray(bytesArray.size());
+    QString size_of_bytesArray(QString::number(bytesArray.size()));
     ui.textEdit->append(size_of_bytesArray);
 
     ui.textEdit->append("\nreaded data:");
     ui.textEdit->append(bytesArray);
 }
+
 void Client::showInTextEdit(QString message) {
     ui.textEdit->append(message);
 }

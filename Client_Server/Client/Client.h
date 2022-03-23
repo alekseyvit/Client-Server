@@ -3,6 +3,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QLabel>
 #include <QTcpSocket>
+#include <QBuffer>
 #include "ui_Client.h"
 
 class Client : public QMainWindow
@@ -11,21 +12,21 @@ class Client : public QMainWindow
 
 public:
     Client(QWidget *parent = Q_NULLPTR);
+    Client::~Client();
 
 private slots:
     void buttonSendImageClicked();
-
-public slots:
     void buttonDisplayImageClicked();
 
 private:
     void runConnection();
     void showRequestFromServer();
 
-    void Client::showInTextEdit(QByteArray& bytesArray);
-    void Client::showInTextEdit(QString message);
+    void showInTextEdit(QByteArray& bytesArray);
+    void showInTextEdit(QString message);
 
     Ui::ClientClass ui;
     QTcpSocket* socket;
+    QPixmap image;
     QByteArray bytesArray;
 };
