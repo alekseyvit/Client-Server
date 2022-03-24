@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QBuffer>
@@ -25,6 +26,7 @@ class Server : public QTcpServer
     Q_OBJECT
 private:
     QTcpSocket* socket = nullptr;
+    unsigned int bytesInMessage = 0;
     ServerWindow* serverWindow;
     QByteArray bytesArray;
 public:
@@ -34,8 +36,7 @@ public:
     void start(int port);
 
 public slots:
-    void serverHasIncommingConnection();
+    void handleWithIncommingConnection();
     void readDataFromConnection();
     void stoppingConnection();
-    
 };

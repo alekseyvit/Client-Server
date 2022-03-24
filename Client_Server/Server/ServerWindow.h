@@ -13,9 +13,10 @@ private:
 public:
     ServerWindow(QWidget *parent = Q_NULLPTR);
     void setTextEditField(QString& str);
+    void setTextEditField(const char* _str);
     void appendTextEditField(QString& str);
+    void appendTextEditField(const char* _str);
     void setImageToServerWindow(QPixmap& pixMap);
 private slots:
     void buttonDisplayImageClicked();
-
 };

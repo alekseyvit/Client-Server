@@ -22,8 +22,8 @@ private:
     void runConnection();
     void showRequestFromServer();
 
-    void showInTextEdit(QByteArray& bytesArray);
-    void showInTextEdit(QString message);
+    void showAppendInTextEdit(QString message);
+    void showAppendInTextEdit(const char* str);
 
     Ui::ClientClass ui;
     QTcpSocket* socket;

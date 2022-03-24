@@ -6,7 +6,7 @@ Server::Server(QWidget* parent) : QTcpServer(parent)
     qDebug() << "Server construction: ";
 
     connect(this, SIGNAL(newConnection()),
-        this, SLOT(serverHasIncommingConnection()));
+        this, SLOT(handleWithIncommingConnection()));
 }
 
 Server::~Server() {
@@ -18,20 +18,19 @@ void Server::connectWithServerWindow(ServerWindow* _serverWindow) {
     serverWindow = _serverWindow;
 }
 
+/*Start listenning for connections*/
 void Server::start(int port) {
     if (this->listen(QHostAddress::Any, port)) {
-        //qDebug() << "Listening: " << this->isListening(); //qDebug() << "Server started";
         QString str = "Server started.\nListening: ";
         str.append((this->isListening()) ? "true" : "false");
         serverWindow->setTextEditField(str);
     }
     else {
-        //qDebug() << this->isListening(); //qDebug() << "Error?";
-        QString str = "Server didn't start";
-        serverWindow->setTextEditField(str);
+        serverWindow->setTextEditField("Server didn't start");
     }
 }
 
+/*Executes on readyRead signal from socket*/
 void Server::readDataFromConnection() {
     int bytesAvailable = 0;
     while ((bytesAvailable = this->socket->bytesAvailable()) > 0)
@@ -40,36 +39,49 @@ void Server::readDataFromConnection() {
         readProcess += " bytes...";
         serverWindow->appendTextEditField(readProcess);
         
+        //read
         bytesArray.append(socket->read(bytesAvailable));
-        //bytesArray.append(socket->readAll());
+ 
+        // Calculate amount bytes in Message (Picture)
+        if (bytesInMessage == 0) {
+            union
+            {
+                unsigned int number;
+                char arr[4];
+            } msgLength;
+
+            for (int i = 0; i < sizeof(unsigned int); ++i) {
+                msgLength.arr[i] = bytesArray.at(i);
+            }
+            bytesInMessage = msgLength.number;
+        }
+
+        /*QString curr = bytesArray.toBase64(); //for debugging:
+        serverWindow->appendTextEditField(curr);*/
     }
 }
 
+/*Stops connection for socket*/
 void Server::stoppingConnection() {
-    QString stoppingConnectionProcess = "stoppingConnectionProcess\n";
-    serverWindow->appendTextEditField(stoppingConnectionProcess);
+    serverWindow->appendTextEditField("stoppingConnectionProcess\n");
+
+    bytesArray.remove(0, sizeof(unsigned int)); // Removes first 4 bytes of ByteArrayData,
+                                                // leaving data unchanged
 
     QPixmap image;
     if (image.loadFromData(bytesArray, "PNG"))
     {
         serverWindow->setImageToServerWindow(image);
     }
-
+    socket->disconnectFromHost();
     socket->deleteLater();
 }
 
-void Server::serverHasIncommingConnection() {
+/*Read data from incommin connection*/
+void Server::handleWithIncommingConnection() {
     socket = this->nextPendingConnection();
-    /*if(socket->isOpen())
-        socket = this->nextPendingConnection();
-    else {
-        QString error = "ERROR. Can't use this->socket\n";
-        serverWindow->appendTextEditField(error);
-    }*/
-    connect(socket, SIGNAL(disconnected()),
-        this, SLOT(stoppingConnection())//mush free dynamic memory
-    );
     bytesArray.clear();
+
     connect(socket, SIGNAL(readyRead()),
         this, SLOT(readDataFromConnection())
     );
@@ -78,27 +90,11 @@ void Server::serverHasIncommingConnection() {
     socket->flush();
     socket->waitForBytesWritten(1000);
 
-    // I want disconnect from client if no data is readyRead
-    // Not sure that this if is correct
-    // Doesn't work with big files which comes in several parths (when several readyRead emited)
-    //if (socket->waitForReadyRead()) {
-    //    QString YES = "YES";
-    //    serverWindow->appendTextEditField(YES);
-
-    //    //QString str = bytesArray.toBase64();
-    //    //serverWindow->appendTextEditField(str);
-
-    //    QPixmap image;
-    //    if (image.loadFromData(bytesArray, "PNG"))
-    //    {
-    //        serverWindow->setImageToServerWindow(image);
-    //    }
-    //}
-    //else {
-    //    QString NO = "NO";
-    //    serverWindow->appendTextEditField(NO);
-
-    //    QString str = bytesArray.toBase64();
-    //    serverWindow->appendTextEditField(str);
-    //}
+    // I want disconnect from client if no data is readyRead for 3 sec
+    while (bytesInMessage + sizeof(unsigned int) > bytesArray.size()) {
+        if(socket->waitForReadyRead(1000)) {
+            serverWindow->appendTextEditField("Reading...");
+        }
+    }
+    stoppingConnection();
 }

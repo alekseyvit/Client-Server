@@ -13,7 +13,17 @@ void ServerWindow::setTextEditField(QString& str) {
     ui.textEdit->setText(str);
 }
 
+void ServerWindow::setTextEditField(const char* _str) {
+    QString str = _str;
+    ui.textEdit->setText(str);
+}
+
 void ServerWindow::appendTextEditField(QString& str) {
+    ui.textEdit->append(str);
+}
+
+void ServerWindow::appendTextEditField(const char* _str) {
+    QString str = _str;
     ui.textEdit->append(str);
 }
 
