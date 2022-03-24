@@ -17,6 +17,7 @@ public:
     void appendTextEditField(QString& str);
     void appendTextEditField(const char* _str);
     void setImageToServerWindow(QPixmap& pixMap);
+    void displayImage();
 private slots:
     void buttonDisplayImageClicked();
 };

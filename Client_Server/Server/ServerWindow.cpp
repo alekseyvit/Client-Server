@@ -36,3 +36,7 @@ void ServerWindow::buttonDisplayImageClicked() {
     this->appendTextEditField(str);
     ui.label->setPixmap(image);
 }
+
+void ServerWindow::displayImage() {
+    ui.label->setPixmap(image);
+}

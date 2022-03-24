@@ -75,6 +75,8 @@ void Server::stoppingConnection() {
     }
     socket->disconnectFromHost();
     socket->deleteLater();
+
+    serverWindow->displayImage();// added due to tecnical task
 }
 
 /*Read data from incommin connection*/
