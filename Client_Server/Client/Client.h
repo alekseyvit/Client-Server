@@ -26,7 +26,7 @@ private:
     void showAppendInTextEdit(const char* str);
 
     Ui::ClientClass ui;
-    QTcpSocket* socket;
+    QTcpSocket* socket = nullptr;
     QPixmap image;
     QByteArray bytesArray;
 };

@@ -38,7 +38,7 @@ void Client::buttonSendImageClicked() {
 
         socket = new QTcpSocket(this);
         socket->connectToHost("127.0.0.1", 1234);//localhost
-        connect(socket, SIGNAL(disconnect()), this, SLOT(deleteLater()));
+        //connect(socket, SIGNAL(disconnect()), this, SLOT(deleteLater()));
 
         //From QPixmap TO QByteArray
         bytesArray.clear();
@@ -78,10 +78,20 @@ void Client::buttonSendImageClicked() {
             // send picture
             socket->write(bytesArray);
             socket->waitForBytesWritten(10000);
+
+            //socket->disconnect();
         }
         else { // Not Connected
             showAppendInTextEdit("Not Connected\n");
         }
+
+        socket->disconnect();
+        socket->disconnectFromHost();
+        socket->deleteLater();
+        //delete socket;
+        // Don't need to delete it manually
+        // because parent will delete it automatically
+        socket = nullptr;
     }
     else {
         // Can't load file
