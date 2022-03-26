@@ -73,9 +73,19 @@ void Server::stoppingConnection() {
     {
         serverWindow->setImageToServerWindow(image);
     }
+    else {
+        QString errorString = "bytesArray.size() = " + QString::number(bytesArray.size());
+        serverWindow->appendTextEditField(errorString);
+        serverWindow->appendTextEditField("\n\nError: received data can't be transformed to QPixmap!\n\n");
+        image.fill(Qt::black);
+    }
+    socket->disconnect();
     socket->disconnectFromHost();
+    /*socket->close();*/
     socket->deleteLater();
-
+    socket = nullptr;
+    bytesInMessage = 0;//Change this for next connection
+    bytesArray.clear();
     serverWindow->displayImage();// added due to tecnical task
 }
 
@@ -88,15 +98,16 @@ void Server::handleWithIncommingConnection() {
         this, SLOT(readDataFromConnection())
     );
 
-    socket->write("hello client\r\n");
-    socket->flush();
-    socket->waitForBytesWritten(1000);
+    //socket->write("hello client\r\n");
+    //socket->flush();
+    //socket->waitForBytesWritten(1000);
 
-    // I want disconnect from client if no data is readyRead for 3 sec
+    // I want disconnect from client if we received all the Image-data
     while (bytesInMessage + sizeof(unsigned int) > bytesArray.size()) {
         if(socket->waitForReadyRead(1000)) {
             serverWindow->appendTextEditField("Reading...");
         }
     }
+    
     stoppingConnection();
 }

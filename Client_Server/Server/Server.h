@@ -27,7 +27,7 @@ class Server : public QTcpServer
 private:
     QTcpSocket* socket = nullptr;
     unsigned int bytesInMessage = 0;
-    ServerWindow* serverWindow;
+    ServerWindow* serverWindow = nullptr;
     QByteArray bytesArray;
 public:
     Server(QWidget* parent = Q_NULLPTR);

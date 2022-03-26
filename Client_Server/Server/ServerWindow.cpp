@@ -28,12 +28,12 @@ void ServerWindow::appendTextEditField(const char* _str) {
 }
 
 void ServerWindow::setImageToServerWindow(QPixmap& receivedPixMap) {
+    this->appendTextEditField("stored image is changed");
     image = receivedPixMap;
 }
 
 void ServerWindow::buttonDisplayImageClicked() {
-    QString str = "buttonDisplayImageClicked";
-    this->appendTextEditField(str);
+    this->appendTextEditField("buttonDisplayImageClicked");
     ui.label->setPixmap(image);
 }
 
