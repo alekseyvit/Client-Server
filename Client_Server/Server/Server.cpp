@@ -27,6 +27,7 @@ void Server::start(int port) {
     }
     else {
         _serverWindow->setTextEditField("Server didn't start");
+        throw std::exception("Server didn't start");
     }
 }
 
