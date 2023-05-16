@@ -1,11 +1,13 @@
 #pragma once
 
+#include "ui_Server.h"
+#include "ServerWindow.h"
+
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QBuffer>
-#include "ui_Server.h"
-#include "ServerWindow.h"
+
 
 /*создание серверного сокета;
 

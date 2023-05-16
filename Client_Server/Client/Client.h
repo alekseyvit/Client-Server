@@ -1,10 +1,12 @@
 #pragma once
 
+#include "ui_Client.h"
+
 #include <QtWidgets/QMainWindow>
 #include <QLabel>
 #include <QTcpSocket>
 #include <QBuffer>
-#include "ui_Client.h"
+
 
 class Client : public QMainWindow
 {

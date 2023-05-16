@@ -1,7 +1,9 @@
 #pragma once
 
-#include <QtWidgets/QMainWindow>
 #include "ui_Server.h"
+
+#include <QtWidgets/QMainWindow>
+
 
 class ServerWindow : public QMainWindow
 {
