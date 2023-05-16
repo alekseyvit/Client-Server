@@ -8,12 +8,12 @@ class ServerWindow : public QMainWindow
     Q_OBJECT
 private:
     //label, displayButton, textEdit
-    QPixmap image;
-    Ui::ServerClass ui;
+    QPixmap _image;
+    Ui::ServerClass _ui;
 public:
     ServerWindow(QWidget *parent = Q_NULLPTR);
     void setTextEditField(QString& str);
-    void setTextEditField(const char* _str);
+    void setTextEditField(const char* str);
     void appendTextEditField(QString& str);
     void appendTextEditField(const char* _str);
     void setImageToServerWindow(QPixmap& pixMap);

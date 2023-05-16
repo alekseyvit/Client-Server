@@ -4,58 +4,56 @@
 ServerWindow::ServerWindow(QWidget *parent)
     : QMainWindow(parent)
 {
-    ui.setupUi(this);
-    connect(ui.displayButton, SIGNAL(clicked(bool)),
+    _ui.setupUi(this);
+    connect(_ui.displayButton, SIGNAL(clicked(bool)),
         this, SLOT(buttonDisplayImageClicked()));
 }
 
 void ServerWindow::setTextEditField(QString& str) {
-    ui.textEdit->setText(str);
+    _ui.textEdit->setText(str);
 }
 
-void ServerWindow::setTextEditField(const char* _str) {
-    QString str = _str;
-    ui.textEdit->setText(str);
+void ServerWindow::setTextEditField(const char* str) {
+    _ui.textEdit->setText(QString(str));
 }
 
 void ServerWindow::appendTextEditField(QString& str) {
-    ui.textEdit->append(str);
+    _ui.textEdit->append(str);
 }
 
-void ServerWindow::appendTextEditField(const char* _str) {
-    QString str = _str;
-    ui.textEdit->append(str);
+void ServerWindow::appendTextEditField(const char* str) {
+    _ui.textEdit->append(QString(str));
 }
 
 void ServerWindow::setImageToServerWindow(QPixmap& receivedPixMap) {
-    this->appendTextEditField("stored image is changed");
-    image = receivedPixMap;
+    this->appendTextEditField("stored _image is changed");
+    _image = receivedPixMap;
 }
 
 void ServerWindow::buttonDisplayImageClicked() {
     this->appendTextEditField("buttonDisplayImageClicked");
-    ui.label->setPixmap(image);
+    _ui.label->setPixmap(_image);
 }
 
 void ServerWindow::displayImage() {
     QPixmap imageToShow;
-    if ( image.size().height() > ui.centralWidget->size().height() ) {
-        QString str = QString::number(image.size().height());
+    if ( _image.size().height() > _ui.centralWidget->size().height() ) {
+        QString str = QString::number(_image.size().height());
         this->appendTextEditField(str);
 
-        str = QString::number(ui.centralWidget->size().height());
+        str = QString::number(_ui.centralWidget->size().height());
         this->appendTextEditField(str);
         
-        imageToShow = image.scaledToHeight(ui.centralWidget->size().height());
+        imageToShow = _image.scaledToHeight(_ui.centralWidget->size().height());
     }
-    if ( image.size().width() > ui.centralWidget->size().width() ) {
-        QString str = QString::number(image.size().width());
+    if ( _image.size().width() > _ui.centralWidget->size().width() ) {
+        QString str = QString::number(_image.size().width());
         this->appendTextEditField(str);
 
-        str = QString::number(ui.centralWidget->size().width());
+        str = QString::number(_ui.centralWidget->size().width());
         this->appendTextEditField(str);
 
-        imageToShow = image.scaledToWidth(ui.centralWidget->size().width());
+        imageToShow = _image.scaledToWidth(_ui.centralWidget->size().width());
     }
-    ui.label->setPixmap(imageToShow);
+    _ui.label->setPixmap(imageToShow);
 }
