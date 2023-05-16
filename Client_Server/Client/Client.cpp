@@ -2,62 +2,64 @@
 
 Client::Client(QWidget *parent) : QMainWindow(parent)
 {
-    ui.setupUi(this);
-    connect(ui.buttonDisplayImage, SIGNAL(clicked(bool)), this, SLOT(buttonDisplayImageClicked()));
-    connect(ui.buttonSendImage, SIGNAL(clicked(bool)), this, SLOT(buttonSendImageClicked()));
+    _ui.setupUi(this);
+    connect(_ui.buttonDisplayImage, SIGNAL(clicked(bool)), this, SLOT(buttonDisplayImageClicked()));
+    connect(_ui.buttonSendImage, SIGNAL(clicked(bool)), this, SLOT(buttonSendImageClicked()));
     
-    ui.textEdit->setText("3.jpg");
+    _ui.textEdit->setText("3.png");
 }
 
 Client::~Client() {
-    //delete socket;
+    //delete _socket;
 }
 
 void Client::buttonDisplayImageClicked() {
-    ui.labelForImage->setText("the buttonDisplayImage has been clicked !");
-    QString pathToImage = ui.textEdit->toPlainText();
-    //ui.labelForImage->setText(pathToImage);
-    if (image.load(pathToImage)) {
+    _ui.labelForImage->setText("the buttonDisplayImage has been clicked !");
+    QString pathToImage = _ui.textEdit->toPlainText();
+    pathToImage = "..\\..\\Images\\" + pathToImage;
+    //_ui.labelForImage->setText(pathToImage);
+    if (_image.load(pathToImage)) {
         // Loaded !
-        ui.labelForImage->setPixmap(image);
+        _ui.labelForImage->setPixmap(_image);
     }
     else {
         // Can't load file
-        image = QPixmap();
-        ui.labelForImage->setText("Can't open Image!");
+        _image = QPixmap();
+        _ui.labelForImage->setText("Can't open Image!");
     }
 }
 
 void Client::buttonSendImageClicked() {
-    ui.labelForImage->setText("the buttonDisplayImage has been clicked !");
+    _ui.labelForImage->setText("the buttonDisplayImage has been clicked !");
 
-    QString pathToImage = ui.textEdit->toPlainText();
-    if (image.load(pathToImage)) {
+    QString pathToImage = _ui.textEdit->toPlainText();
+    pathToImage = "..\\..\\Images\\" + pathToImage;
+    if (_image.load(pathToImage)) {
         // Loaded !
-        ui.labelForImage->setPixmap(image);
+        _ui.labelForImage->setPixmap(_image);
 
-        socket = new QTcpSocket(this);
-        socket->connectToHost("127.0.0.1", 1234);//localhost
-        //connect(socket, SIGNAL(disconnect()), this, SLOT(deleteLater()));
+        _socket = new QTcpSocket(this);
+        _socket->connectToHost("127.0.0.1", 1234);//localhost
+        //connect(_socket, SIGNAL(disconnect()), this, SLOT(deleteLater()));
 
         //From QPixmap TO QByteArray
-        bytesArray.clear();
-        QBuffer buffer(&bytesArray);
+        _bytesArray.clear();
+        QBuffer buffer(&_bytesArray);
         buffer.open(QIODevice::WriteOnly);
-        image.save(&buffer, "PNG");//, "png", 0
-        bytesArray = buffer.data();
+        _image.save(&buffer, "PNG");//, "png", 0
+        _bytesArray = buffer.data();
 
-        showAppendInTextEdit("Sending image file...");
-        //showAppendInTextEdit(this->bytesArray.toBase64());
+        showAppendInTextEdit("Sending _image file...");
+        //showAppendInTextEdit(this->_bytesArray.toBase64());
 
-        if (socket->waitForConnected(3000)) {
+        if (_socket->waitForConnected(3000)) {
             // Connected 
 
             //send
-            showAppendInTextEdit(QString::number(bytesArray.size()));
+            showAppendInTextEdit(QString::number(_bytesArray.size()));
 
-            int len = bytesArray.size();
-            //bytesArray.insert(0, (const char*)len, sizeof(int));
+            int len = _bytesArray.size();
+            //_bytesArray.insert(0, (const char*)len, sizeof(int));
             
             // prepare length of picture in bytes for sending to client
             union
@@ -65,7 +67,7 @@ void Client::buttonSendImageClicked() {
                 unsigned int number;
                 char arr[4];
             } msgLength;
-            msgLength.number = bytesArray.size();
+            msgLength.number = _bytesArray.size();
 
             QByteArray msg;
             msg.clear();
@@ -74,34 +76,35 @@ void Client::buttonSendImageClicked() {
             //showAppendInTextEdit(msgLen);
 
             //send pixture lingth in bytes
-            socket->write(msg);
+            _socket->write(msg);
             // send picture
-            socket->write(bytesArray);
-            socket->waitForBytesWritten(10000);
+            _socket->write(_bytesArray);
+            _socket->waitForBytesWritten(10000);
 
-            //socket->disconnect();
+            //_socket->disconnect();
         }
         else { // Not Connected
             showAppendInTextEdit("Not Connected\n");
         }
 
-        socket->disconnect();
-        socket->disconnectFromHost();
-        socket->deleteLater();
-        //delete socket;
+        _socket->disconnect();
+        _socket->disconnectFromHost();
+        _socket->deleteLater();
+        // delete _socket;
         // Don't need to delete it manually
         // because parent will delete it automatically
-        socket = nullptr;
+        _socket = nullptr;
     }
     else {
         // Can't load file
-        image = QPixmap();
-        ui.labelForImage->setText("Can't open Image!");
+        _image = QPixmap();
+        _ui.labelForImage->setText("Can't open Image!");
+        throw std::exception("Can't open Image while trying to send Image.");
     }
 }
 
-void Client::showAppendInTextEdit(QString message) {
-    ui.textEdit->append(message);
+void Client::showAppendInTextEdit(const QString& message) {
+    _ui.textEdit->append(message);
 }
 
 void Client::showAppendInTextEdit(const char* str) {

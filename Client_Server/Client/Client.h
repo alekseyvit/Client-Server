@@ -22,11 +22,11 @@ private:
     void runConnection();
     void showRequestFromServer();
 
-    void showAppendInTextEdit(QString message);
+    void showAppendInTextEdit(const QString& message);
     void showAppendInTextEdit(const char* str);
 
-    Ui::ClientClass ui;
-    QTcpSocket* socket = nullptr;
-    QPixmap image;
-    QByteArray bytesArray;
+    Ui::ClientClass _ui;
+    QTcpSocket* _socket = nullptr;
+    QPixmap _image;
+    QByteArray _bytesArray;
 };
