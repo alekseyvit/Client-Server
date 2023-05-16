@@ -27,6 +27,4 @@ private:
 
     Ui::ClientClass _ui;
     QTcpSocket* _socket = nullptr;
-    QPixmap _image;
-    QByteArray _bytesArray;
 };

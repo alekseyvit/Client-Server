@@ -18,14 +18,17 @@ void Client::buttonDisplayImageClicked() {
     QString pathToImage = _ui.textEdit->toPlainText();
     pathToImage = "..\\..\\Images\\" + pathToImage;
     //_ui.labelForImage->setText(pathToImage);
-    if (_image.load(pathToImage)) {
+    QPixmap image;
+    if (image.load(pathToImage)) {
         // Loaded !
-        _ui.labelForImage->setPixmap(_image);
+        _ui.labelForImage->setPixmap(image);
     }
     else {
         // Can't load file
-        _image = QPixmap();
+        _ui.textEdit->append("Can't open Image!");
+        _ui.labelForImage->clear();
         _ui.labelForImage->setText("Can't open Image!");
+        //throw std::exception("Can't load image! buttonDisplayImageClicked");
     }
 }
 
@@ -34,32 +37,34 @@ void Client::buttonSendImageClicked() {
 
     QString pathToImage = _ui.textEdit->toPlainText();
     pathToImage = "..\\..\\Images\\" + pathToImage;
-    if (_image.load(pathToImage)) {
+    QPixmap image;
+    if (image.load(pathToImage)) {
         // Loaded !
-        _ui.labelForImage->setPixmap(_image);
+        _ui.labelForImage->setPixmap(image);
 
         _socket = new QTcpSocket(this);
         _socket->connectToHost("127.0.0.1", 1234);//localhost
         //connect(_socket, SIGNAL(disconnect()), this, SLOT(deleteLater()));
 
         //From QPixmap TO QByteArray
-        _bytesArray.clear();
-        QBuffer buffer(&_bytesArray);
+        QByteArray bytesArray;
+        QBuffer buffer(&bytesArray);
         buffer.open(QIODevice::WriteOnly);
-        _image.save(&buffer, "PNG");//, "png", 0
-        _bytesArray = buffer.data();
+        image.save(&buffer, "PNG");//, "png", 0
+        
+        bytesArray = buffer.data();
 
-        showAppendInTextEdit("Sending _image file...");
-        //showAppendInTextEdit(this->_bytesArray.toBase64());
+        showAppendInTextEdit("Sending image file...");
+        //showAppendInTextEdit(this->bytesArray.toBase64());
 
         if (_socket->waitForConnected(3000)) {
             // Connected 
 
             //send
-            showAppendInTextEdit(QString::number(_bytesArray.size()));
+            showAppendInTextEdit(QString::number(bytesArray.size()));
 
-            int len = _bytesArray.size();
-            //_bytesArray.insert(0, (const char*)len, sizeof(int));
+            int len = bytesArray.size();
+            //bytesArray.insert(0, (const char*)len, sizeof(int));
             
             // prepare length of picture in bytes for sending to client
             union
@@ -67,7 +72,7 @@ void Client::buttonSendImageClicked() {
                 unsigned int number;
                 char arr[4];
             } msgLength;
-            msgLength.number = _bytesArray.size();
+            msgLength.number = bytesArray.size();
 
             QByteArray msg;
             msg.clear();
@@ -78,7 +83,7 @@ void Client::buttonSendImageClicked() {
             //send pixture lingth in bytes
             _socket->write(msg);
             // send picture
-            _socket->write(_bytesArray);
+            _socket->write(bytesArray);
             _socket->waitForBytesWritten(10000);
 
             //_socket->disconnect();
@@ -96,10 +101,10 @@ void Client::buttonSendImageClicked() {
         _socket = nullptr;
     }
     else {
-        // Can't load file
-        _image = QPixmap();
-        _ui.labelForImage->setText("Can't open Image!");
-        throw std::exception("Can't open Image while trying to send Image.");
+        // Can't load image-file
+        _ui.labelForImage->clear();
+        _ui.labelForImage->setText("Can't send Image!");
+        //throw std::exception("Can't open Image while trying to send Image.");
     }
 }
 
