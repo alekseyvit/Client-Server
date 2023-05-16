@@ -1,0 +1,6 @@
+Client_Server/Debug/*
+
+Client_Server/Client/Debug/*
+Client_Server/Server/Debug/*
+
+Client_Server/.vs/*
