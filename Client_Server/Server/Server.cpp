@@ -10,12 +10,12 @@ Server::Server(QWidget* parent) : QTcpServer(parent)
 }
 
 Server::~Server() {
-    // socket will be deleted by deleteLater method
-    // serverWindow is allocated in heap in main.cpp
+    // _socket will be deleted by deleteLater method
+    // _serverWindow is allocated in heap in main.cpp
 }
 
-void Server::connectWithServerWindow(ServerWindow* _serverWindow) {
-    serverWindow = _serverWindow;
+void Server::connectWithServerWindow(ServerWindow* serverWindow) {
+    _serverWindow = serverWindow;
 }
 
 /*Start listenning for connections*/
@@ -23,27 +23,27 @@ void Server::start(int port) {
     if (this->listen(QHostAddress::Any, port)) {
         QString str = "Server started.\nListening: ";
         str.append((this->isListening()) ? "true" : "false");
-        serverWindow->setTextEditField(str);
+        _serverWindow->setTextEditField(str);
     }
     else {
-        serverWindow->setTextEditField("Server didn't start");
+        _serverWindow->setTextEditField("Server didn't start");
     }
 }
 
-/*Executes on readyRead signal from socket*/
+/*Executes on readyRead signal from _socket*/
 void Server::readDataFromConnection() {
     int bytesAvailable = 0;
-    while ((bytesAvailable = this->socket->bytesAvailable()) > 0)
+    while ((bytesAvailable = this->_socket->bytesAvailable()) > 0)
     {
         QString readProcess = "reading " + QString::number(bytesAvailable);
         readProcess += " bytes...";
-        serverWindow->appendTextEditField(readProcess);
+        _serverWindow->appendTextEditField(readProcess);
         
         //read
-        bytesArray.append(socket->read(bytesAvailable));
+        _bytesArray.append(_socket->read(bytesAvailable));
  
         // Calculate amount bytes in Message (Picture)
-        if (bytesInMessage == 0) {
+        if (_bytesInMessage == 0) {
             union
             {
                 unsigned int number;
@@ -51,61 +51,62 @@ void Server::readDataFromConnection() {
             } msgLength;
 
             for (int i = 0; i < sizeof(unsigned int); ++i) {
-                msgLength.arr[i] = bytesArray.at(i);
+                msgLength.arr[i] = _bytesArray.at(i);
             }
-            bytesInMessage = msgLength.number;
+            _bytesInMessage = msgLength.number;
         }
 
-        /*QString curr = bytesArray.toBase64(); //for debugging:
-        serverWindow->appendTextEditField(curr);*/
+        /*QString curr = _bytesArray.toBase64(); //for debugging:
+        _serverWindow->appendTextEditField(curr);*/
     }
 }
 
-/*Stops connection for socket*/
+/*Stops connection for _socket*/
 void Server::stoppingConnection() {
-    serverWindow->appendTextEditField("stoppingConnectionProcess\n");
+    _serverWindow->appendTextEditField("stoppingConnectionProcess\n");
 
-    bytesArray.remove(0, sizeof(unsigned int)); // Removes first 4 bytes of ByteArrayData,
+    _bytesArray.remove(0, sizeof(unsigned int)); // Removes first 4 bytes of ByteArrayData,
                                                 // leaving data unchanged
 
     QPixmap image;
-    if (image.loadFromData(bytesArray, "PNG"))
+    if (image.loadFromData(_bytesArray, "PNG"))
     {
-        serverWindow->setImageToServerWindow(image);
+        _serverWindow->setImageToServerWindow(image);
     }
     else {
-        QString errorString = "bytesArray.size() = " + QString::number(bytesArray.size());
-        serverWindow->appendTextEditField(errorString);
-        serverWindow->appendTextEditField("\n\nError: received data can't be transformed to QPixmap!\n\n");
+        QString errorString = "_bytesArray.size() = " + QString::number(_bytesArray.size());
+        _serverWindow->appendTextEditField(errorString);
+        _serverWindow->appendTextEditField("\n\nError: received data can't be transformed to QPixmap!\n\n");
         image.fill(Qt::black);
     }
-    socket->disconnect();
-    socket->disconnectFromHost();
-    /*socket->close();*/
-    socket->deleteLater();
-    socket = nullptr;
-    bytesInMessage = 0;//Change this for next connection
-    bytesArray.clear();
-    serverWindow->displayImage();// added due to tecnical task
+    _socket->disconnect();
+    _socket->disconnectFromHost();
+    /*_socket->close();*/
+    _socket->deleteLater();
+    _socket = nullptr;
+    _bytesInMessage = 0;//Change this for next connection
+    _bytesArray.clear();
+    _serverWindow->displayImage();// added due to tecnical task
 }
 
 /*Read data from incommin connection*/
 void Server::handleWithIncommingConnection() {
-    socket = this->nextPendingConnection();
-    bytesArray.clear();
+    _socket = this->nextPendingConnection();
+    _bytesArray.clear();
 
-    connect(socket, SIGNAL(readyRead()),
+    connect(_socket, SIGNAL(readyRead()),
         this, SLOT(readDataFromConnection())
     );
 
-    //socket->write("hello client\r\n");
-    //socket->flush();
-    //socket->waitForBytesWritten(1000);
+    //_socket->write("hello client\r\n");
+    //_socket->flush();
+    //_socket->waitForBytesWritten(1000);
 
     // I want disconnect from client if we received all the Image-data
-    while (bytesInMessage + sizeof(unsigned int) > bytesArray.size()) {
-        if(socket->waitForReadyRead(1000)) {
-            serverWindow->appendTextEditField("Reading...");
+    while (_bytesInMessage + sizeof(unsigned int) > _bytesArray.size()) {
+        int msecs = 1000;
+        if(_socket->waitForReadyRead(msecs)) {
+            _serverWindow->appendTextEditField("Reading...");
         }
     }
     

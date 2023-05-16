@@ -9,7 +9,7 @@ ServerWindow::ServerWindow(QWidget *parent)
         this, SLOT(buttonDisplayImageClicked()));
 }
 
-void ServerWindow::setTextEditField(QString& str) {
+void ServerWindow::setTextEditField(const QString& str) {
     _ui.textEdit->setText(str);
 }
 
@@ -17,7 +17,7 @@ void ServerWindow::setTextEditField(const char* str) {
     _ui.textEdit->setText(QString(str));
 }
 
-void ServerWindow::appendTextEditField(QString& str) {
+void ServerWindow::appendTextEditField(const QString& str) {
     _ui.textEdit->append(str);
 }
 
