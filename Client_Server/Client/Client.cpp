@@ -3,9 +3,10 @@
 Client::Client(QWidget *parent) : QMainWindow(parent)
 {
     _ui.setupUi(this);
-    connect(_ui.buttonDisplayImage, SIGNAL(clicked(bool)), this, SLOT(buttonDisplayImageClicked()));
-    connect(_ui.buttonSendImage, SIGNAL(clicked(bool)), this, SLOT(buttonSendImageClicked()));
-    
+    auto connected = connect(_ui.buttonDisplayImage, SIGNAL(clicked(bool)), this, SLOT(buttonDisplayImageClicked()));
+    assert(connected);
+    connected = connect(_ui.buttonSendImage, SIGNAL(clicked(bool)), this, SLOT(buttonSendImageClicked()));
+    assert(connected);
     _ui.textEdit->setText("3.png");
 }
 
