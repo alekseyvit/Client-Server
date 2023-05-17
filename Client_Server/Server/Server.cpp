@@ -80,7 +80,7 @@ void Server::stoppingConnection() {
         _serverWindow->appendTextEditField("\n\nError: received data can't be transformed to QPixmap!\n\n");
         image.fill(Qt::black);
     }
-    _socket->disconnect();
+
     _socket->disconnectFromHost();
     /*_socket->close();*/
     _socket->deleteLater();
