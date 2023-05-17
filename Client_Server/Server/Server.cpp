@@ -15,19 +15,21 @@ Server::~Server() {
     // _serverWindow is allocated in heap in main.cpp
 }
 
-void Server::connectWithServerWindow(ServerWindow* serverWindow) {
-    _serverWindow = serverWindow;
-}
+//void Server::connectWithServerWindow(ServerWindow* serverWindow) {
+//    _serverWindow = serverWindow;
+//}
 
 /*Start listenning for connections*/
 void Server::start(int port) {
     if (this->listen(QHostAddress::Any, port)) {
         QString str = "Server started.\nListening: ";
         str.append((this->isListening()) ? "true" : "false");
-        _serverWindow->setTextEditField(str);
+        //_serverWindow->setTextToGUI(str);
+        emit setTextSignal(str);
     }
     else {
-        _serverWindow->setTextEditField("Server didn't start");
+        //_serverWindow->setTextToGUI("Server didn't start");
+        emit setTextSignal(QString("Server didn't start"));
         throw std::exception("Server didn't start");
     }
 }
@@ -39,7 +41,8 @@ void Server::readDataFromConnection() {
     {
         QString readProcess = "reading " + QString::number(bytesAvailable);
         readProcess += " bytes...";
-        _serverWindow->appendTextEditField(readProcess);
+        //_serverWindow->appendTextToGUI(readProcess);
+        emit appendTextSignal(readProcess);
         
         //read
         _bytesArray.append(_socket->read(bytesAvailable));
@@ -59,13 +62,14 @@ void Server::readDataFromConnection() {
         }
 
         /*QString curr = _bytesArray.toBase64(); //for debugging:
-        _serverWindow->appendTextEditField(curr);*/
+        _serverWindow->appendTextToGUI(curr);*/
     }
 }
 
 /*Stops connection for _socket*/
 void Server::stoppingConnection() {
-    _serverWindow->appendTextEditField("stoppingConnectionProcess\n");
+    //_serverWindow->appendTextToGUI("stoppingConnectionProcess\n");
+    emit appendTextSignal(QString("stoppingConnectionProcess\n"));
 
     _bytesArray.remove(0, sizeof(unsigned int)); // Removes first 4 bytes of ByteArrayData,
                                                 // leaving data unchanged
@@ -73,12 +77,15 @@ void Server::stoppingConnection() {
     QPixmap image;
     if (image.loadFromData(_bytesArray, "PNG"))
     {
-        _serverWindow->setImageToServerWindow(image);
+        //_serverWindow->setImageToGUI(image);
+        emit setImageSignal(image);
     }
     else {
         QString errorString = "_bytesArray.size() = " + QString::number(_bytesArray.size());
-        _serverWindow->appendTextEditField(errorString);
-        _serverWindow->appendTextEditField("\n\nError: received data can't be transformed to QPixmap!\n\n");
+        //_serverWindow->appendTextToGUI(errorString);
+        emit appendTextSignal(errorString);
+        //_serverWindow->appendTextToGUI("\n\nError: received data can't be transformed to QPixmap!\n\n");
+        emit appendTextSignal(QString("\n\nError: received data can't be transformed to QPixmap!\n\n"));
         image.fill(Qt::black);
     }
 
@@ -88,7 +95,8 @@ void Server::stoppingConnection() {
     _socket = nullptr;
     _bytesInMessage = 0;//Change this for next connection
     _bytesArray.clear();
-    _serverWindow->displayImage();// added due to tecnical task
+    //_serverWindow->displayImage();// added due to tecnical task
+    emit displayImageSignal();// added due to tecnical task
 }
 
 /*Read data from incommin connection*/
@@ -109,7 +117,8 @@ void Server::handleWithIncommingConnection() {
     while (_bytesInMessage + sizeof(unsigned int) > _bytesArray.size()) {
         int msecs = 1000;
         if(_socket->waitForReadyRead(msecs)) {
-            _serverWindow->appendTextEditField("Reading...");
+            //_serverWindow->appendTextToGUI("Reading...");
+            emit appendTextSignal(QString("Reading..."));
         }
     }
     

@@ -14,12 +14,16 @@ private:
     Ui::ServerClass _ui;
 public:
     ServerWindow(QWidget *parent = Q_NULLPTR);
-    void setTextEditField(const QString& str);
-    void setTextEditField(const char* str);
-    void appendTextEditField(const QString& str);
-    void appendTextEditField(const char* _str);
-    void setImageToServerWindow(QPixmap& pixMap);
+
+    // may use Observer Pattern instead
+public slots:
+    void setTextToGUI(const QString& str);
+    //void setTextToGUI(const char* str);
+    void appendTextToGUI(const QString& str);
+    //void appendTextToGUI(const char* _str);
+    void setImageToGUI(const QPixmap& pixMap);
     void displayImage();
+
 private slots:
     void buttonDisplayImageClicked();
 };
