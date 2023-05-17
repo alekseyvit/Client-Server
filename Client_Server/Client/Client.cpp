@@ -85,14 +85,11 @@ void Client::buttonSendImageClicked() {
             // send picture
             _socket->write(bytesArray);
             _socket->waitForBytesWritten(10000);
-
-            //_socket->disconnect();
         }
         else { // Not Connected
             showAppendInTextEdit("Not Connected\n");
         }
 
-        _socket->disconnect();
         _socket->disconnectFromHost();
         _socket->deleteLater();
         // delete _socket;
