@@ -28,11 +28,6 @@
 class Server : public QTcpServer
 {
     Q_OBJECT
-private:
-    QTcpSocket* _socket = nullptr;
-    unsigned int _bytesInMessage = 0;
-    //ServerWindow* _serverWindow = nullptr;
-    QByteArray _bytesArray;
 public:
     Server(QWidget* parent = Q_NULLPTR);
     ~Server();
@@ -52,4 +47,9 @@ signals:
     void displayImageSignal();
 signals:
     void setImageSignal(const QPixmap& image);
+
+private:
+    QTcpSocket* _socket = nullptr;
+    unsigned int _bytesInMessage = 0;
+    QByteArray _bytesArray;
 };
