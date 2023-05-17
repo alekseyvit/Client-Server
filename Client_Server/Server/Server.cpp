@@ -5,8 +5,9 @@ Server::Server(QWidget* parent) : QTcpServer(parent)
 {
     qDebug() << "Server construction: ";
 
-    connect(this, SIGNAL(newConnection()),
+    auto connected = connect(this, SIGNAL(newConnection()),
         this, SLOT(handleWithIncommingConnection()));
+    assert(connected);
 }
 
 Server::~Server() {
@@ -95,9 +96,10 @@ void Server::handleWithIncommingConnection() {
     _socket = this->nextPendingConnection();
     _bytesArray.clear();
 
-    connect(_socket, SIGNAL(readyRead()),
+    auto connected = connect(_socket, SIGNAL(readyRead()),
         this, SLOT(readDataFromConnection())
     );
+    assert(connected);
 
     //_socket->write("hello client\r\n");
     //_socket->flush();
