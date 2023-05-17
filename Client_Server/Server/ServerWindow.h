@@ -18,9 +18,7 @@ public:
     // may use Observer Pattern instead
 public slots:
     void setTextToGUI(const QString& str);
-    //void setTextToGUI(const char* str);
     void appendTextToGUI(const QString& str);
-    //void appendTextToGUI(const char* _str);
     void setImageToGUI(const QPixmap& pixMap);
     void displayImage();
 

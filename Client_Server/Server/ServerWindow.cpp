@@ -15,17 +15,9 @@ void ServerWindow::setTextToGUI(const QString& str) {
     _ui.textEdit->setText(str);
 }
 
-//void ServerWindow::setTextToGUI(const char* str) {
-//    _ui.textEdit->setText(QString(str));
-//}
-
 void ServerWindow::appendTextToGUI(const QString& str) {
     _ui.textEdit->append(str);
 }
-
-//void ServerWindow::appendTextToGUI(const char* str) {
-//    _ui.textEdit->append(QString(str));
-//}
 
 void ServerWindow::setImageToGUI(const QPixmap& receivedPixMap) {
     this->appendTextToGUI("stored _image is changed");
