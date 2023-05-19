@@ -2,6 +2,14 @@
 
 #include "ui_Client.h"
 
+#include <memory>
+//#include <thread>
+#include <future>
+#include <mutex>
+#include <shared_mutex>
+#include <chrono>
+#include <iostream>
+
 #include <QtWidgets/QMainWindow>
 #include <QLabel>
 #include <QTcpSocket>
@@ -11,22 +19,22 @@
 class Client : public QMainWindow
 {
     Q_OBJECT
-
 public:
     Client(QWidget *parent = Q_NULLPTR);
     Client::~Client();
+    //static void staticSender(QPixmap image);
+    static std::shared_mutex _staticSendImageMutex;
 
 private slots:
     void buttonSendImageClicked();
     void buttonDisplayImageClicked();
 
 private:
-    void runConnection();
-    void showRequestFromServer();
-
     void showAppendInTextEdit(const QString& message);
     void showAppendInTextEdit(const char* str);
+    void sender(QPixmap image);
 
     Ui::ClientClass _ui;
-    QTcpSocket* _socket = nullptr;
+    std::mutex _sendImageMutex;
+    std::mutex _appendLocker;
 };

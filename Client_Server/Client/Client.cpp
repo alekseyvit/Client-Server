@@ -1,5 +1,8 @@
 #include "Client.h"
 
+std::shared_mutex Client::_staticSendImageMutex;
+
+
 Client::Client(QWidget *parent) : QMainWindow(parent)
 {
     _ui.setupUi(this);
@@ -11,7 +14,6 @@ Client::Client(QWidget *parent) : QMainWindow(parent)
 }
 
 Client::~Client() {
-    //delete _socket;
 }
 
 void Client::buttonDisplayImageClicked() {
@@ -33,6 +35,73 @@ void Client::buttonDisplayImageClicked() {
     }
 }
 
+void Client::sender(QPixmap image) {
+    std::lock_guard<std::shared_mutex> lock(Client::_staticSendImageMutex);
+
+    //From QPixmap TO QByteArray
+    QByteArray bytesArray;
+    QBuffer buffer(&bytesArray);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "PNG");//, "png", 0
+
+    bytesArray = buffer.data(); // TODO Error here
+
+    //showAppendInTextEdit("Sending image file...");
+    //showAppendInTextEdit(this->bytesArray.toBase64());
+
+    QTcpSocket* socket = new QTcpSocket();
+    socket->connectToHost("127.0.0.1", 1234);//localhost
+    //connect(socket, SIGNAL(disconnect()), this, SLOT(deleteLater()));
+
+    if (socket->waitForConnected(3000)) {
+        // Connected 
+
+        //send
+        showAppendInTextEdit(QString("sending ") + QString::number(bytesArray.size()) + QString("bytes.."));
+
+        int len = bytesArray.size();
+        //bytesArray.insert(0, (const char*)len, sizeof(int));
+
+        // prepare length of picture in bytes for sending to client
+        union
+        {
+            unsigned int number;
+            char arr[4];
+        } msgLength;
+        msgLength.number = bytesArray.size();
+
+        QByteArray msg;
+        msg.clear();
+        msg.append(msgLength.arr, sizeof(msgLength.number));
+        //QString msgLen = msgLength.arr;
+        //showAppendInTextEdit(msgLen);
+
+        //send pixture lingth in bytes
+        socket->write(msg);
+        // send picture
+        socket->write(bytesArray);
+        socket->waitForBytesWritten(10000);
+    }
+    else { // Not Connected
+        std::cout << "Not Connected\n" << std::endl;
+        showAppendInTextEdit("Not Connected\n");
+    }
+
+    socket->disconnectFromHost();
+    socket->deleteLater();
+    // delete socket;
+    // Don't need to delete it manually
+    // because parent will delete it automatically
+    using namespace std::chrono_literals;
+    std::this_thread::sleep_for(10s);
+}
+
+//void Client::staticSender(QPixmap image) {
+//    std::lock_guard<std::shared_mutex> lock(Client::_staticSendImageMutex);
+//    using namespace std::chrono_literals;
+//    std::this_thread::sleep_for(10s);
+//}
+
 void Client::buttonSendImageClicked() {
     _ui.labelForImage->setText("the buttonDisplayImage has been clicked !");
 
@@ -43,60 +112,17 @@ void Client::buttonSendImageClicked() {
         // Loaded !
         _ui.labelForImage->setPixmap(image);
 
-        _socket = new QTcpSocket(this);
-        _socket->connectToHost("127.0.0.1", 1234);//localhost
-        //connect(_socket, SIGNAL(disconnect()), this, SLOT(deleteLater()));
-
-        //From QPixmap TO QByteArray
-        QByteArray bytesArray;
-        QBuffer buffer(&bytesArray);
-        buffer.open(QIODevice::WriteOnly);
-        image.save(&buffer, "PNG");//, "png", 0
+        //TODO run with purpose or smth
+        //std::thread t(&Client::sender, this, image);
+        //t.detach();
+        //std::async(std::launch:async, &Client::sender, this, image); // Freezes client
+        //std::async(std::launch::async, &Client::staticSender, image); //Freeze
+        //std::async(std::launch::async, [image]() { Client::staticSender(image); }); // Freeze
         
-        bytesArray = buffer.data();
-
-        showAppendInTextEdit("Sending image file...");
-        //showAppendInTextEdit(this->bytesArray.toBase64());
-
-        if (_socket->waitForConnected(3000)) {
-            // Connected 
-
-            //send
-            showAppendInTextEdit(QString::number(bytesArray.size()));
-
-            int len = bytesArray.size();
-            //bytesArray.insert(0, (const char*)len, sizeof(int));
-            
-            // prepare length of picture in bytes for sending to client
-            union
-            {
-                unsigned int number;
-                char arr[4];
-            } msgLength;
-            msgLength.number = bytesArray.size();
-
-            QByteArray msg;
-            msg.clear();
-            msg.append(msgLength.arr, sizeof(msgLength.number));
-            //QString msgLen = msgLength.arr;
-            //showAppendInTextEdit(msgLen);
-
-            //send pixture lingth in bytes
-            _socket->write(msg);
-            // send picture
-            _socket->write(bytesArray);
-            _socket->waitForBytesWritten(10000);
-        }
-        else { // Not Connected
-            showAppendInTextEdit("Not Connected\n");
-        }
-
-        _socket->disconnectFromHost();
-        _socket->deleteLater();
-        // delete _socket;
-        // Don't need to delete it manually
-        // because parent will delete it automatically
-        _socket = nullptr;
+        //std::thread t([image]() { Client::staticSender(image); }); //ok
+        std::thread t([image, this]() { this->sender(image); }); //ok
+        t.detach(); //ok
+        //sender(image);
     }
     else {
         // Can't load image-file
@@ -107,6 +133,7 @@ void Client::buttonSendImageClicked() {
 }
 
 void Client::showAppendInTextEdit(const QString& message) {
+    std::lock_guard<std::mutex> appendLocker(_appendLocker);
     _ui.textEdit->append(message);
 }
 
