@@ -4,3 +4,5 @@ Client_Server/Client/Debug/*
 Client_Server/Server/Debug/*
 
 Client_Server/.vs/*
+
+Client_Server/ServerTest/Debug/*
