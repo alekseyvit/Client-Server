@@ -2,9 +2,6 @@
 
 #include "ui_Client.h"
 
-#include <memory>
-//#include <thread>
-#include <future>
 #include <mutex>
 #include <shared_mutex>
 #include <chrono>
@@ -22,7 +19,6 @@ class Client : public QMainWindow
 public:
     Client(QWidget *parent = Q_NULLPTR);
     Client::~Client();
-    //static void staticSender(QPixmap image);
     static std::shared_mutex _staticSendImageMutex;
 
 private slots:
@@ -35,6 +31,5 @@ private:
     void sender(QPixmap image);
 
     Ui::ClientClass _ui;
-    std::mutex _sendImageMutex;
     std::mutex _appendLocker;
 };

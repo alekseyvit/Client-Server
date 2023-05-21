@@ -92,15 +92,7 @@ void Client::sender(QPixmap image) {
     // delete socket;
     // Don't need to delete it manually
     // because parent will delete it automatically
-    using namespace std::chrono_literals;
-    std::this_thread::sleep_for(10s);
 }
-
-//void Client::staticSender(QPixmap image) {
-//    std::lock_guard<std::shared_mutex> lock(Client::_staticSendImageMutex);
-//    using namespace std::chrono_literals;
-//    std::this_thread::sleep_for(10s);
-//}
 
 void Client::buttonSendImageClicked() {
     _ui.labelForImage->setText("the buttonDisplayImage has been clicked !");
@@ -112,17 +104,7 @@ void Client::buttonSendImageClicked() {
         // Loaded !
         _ui.labelForImage->setPixmap(image);
 
-        //TODO run with purpose or smth
-        //std::thread t(&Client::sender, this, image);
-        //t.detach();
-        //std::async(std::launch:async, &Client::sender, this, image); // Freezes client
-        //std::async(std::launch::async, &Client::staticSender, image); //Freeze
-        //std::async(std::launch::async, [image]() { Client::staticSender(image); }); // Freeze
-        
-        //std::thread t([image]() { Client::staticSender(image); }); //ok
-        std::thread t([image, this]() { this->sender(image); }); //ok
-        t.detach(); //ok
-        //sender(image);
+        sender(image);
     }
     else {
         // Can't load image-file
