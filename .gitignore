@@ -6,3 +6,4 @@ Client_Server/Server/Debug/*
 Client_Server/.vs/*
 
 Client_Server/ServerTest/Debug/*
+Client_Server/packages/*
