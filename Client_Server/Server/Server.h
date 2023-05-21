@@ -31,7 +31,6 @@ class Server : public QTcpServer
 public:
     Server(QWidget* parent = Q_NULLPTR);
     ~Server();
-    //void connectWithServerWindow(ServerWindow* serverWindow);
     void start(int port);
 
 public slots:
