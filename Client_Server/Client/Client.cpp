@@ -104,6 +104,8 @@ void Client::buttonSendImageClicked() {
         // Loaded !
         _ui.labelForImage->setPixmap(image);
 
+        // std::thread t([image, this]() { this->sender(image); }); //ok
+        // t.detach(); //ok
         sender(image);
     }
     else {
