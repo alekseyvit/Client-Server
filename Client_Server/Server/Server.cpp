@@ -12,7 +12,6 @@ Server::Server(QWidget* parent) : QTcpServer(parent)
 
 Server::~Server() {
     // _socket will be deleted by deleteLater method
-    // _serverWindow is allocated in heap in main.cpp
 }
 
 //void Server::connectWithServerWindow(ServerWindow* serverWindow) {
@@ -24,7 +23,6 @@ void Server::start(int port) {
     if (this->listen(QHostAddress::Any, port)) {
         QString str = "Server started.\nListening: ";
         str.append((this->isListening()) ? "true" : "false");
-        //_serverWindow->setTextToGUI(str);
         emit setTextSignal(str);
     }
     else {
@@ -36,7 +34,7 @@ void Server::start(int port) {
 
 /*Executes on readyRead signal from _socket*/
 void Server::readDataFromConnection() {
-    int bytesAvailable = 0;
+    size_t bytesAvailable = 0;
     while ((bytesAvailable = this->_socket->bytesAvailable()) > 0)
     {
         QString readProcess = "reading " + QString::number(bytesAvailable);
@@ -101,6 +99,7 @@ void Server::stoppingConnection() {
 
 /*Read data from incommin connection*/
 void Server::handleWithIncommingConnection() {
+    appendTextSignal(QString("handleWithIncommingConnection..."));
     _socket = this->nextPendingConnection();
     _bytesArray.clear();
 
@@ -114,7 +113,7 @@ void Server::handleWithIncommingConnection() {
     //_socket->waitForBytesWritten(1000);
 
     // I want disconnect from client if we received all the Image-data
-    while (_bytesInMessage + sizeof(unsigned int) > _bytesArray.size()) {
+    while (sizeof(unsigned int) + _bytesInMessage > _bytesArray.size()) {
         int msecs = 1000;
         if(_socket->waitForReadyRead(msecs)) {
             //_serverWindow->appendTextToGUI("Reading...");
