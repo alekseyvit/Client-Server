@@ -19,7 +19,6 @@ class Client : public QMainWindow
 public:
     Client(QWidget *parent = Q_NULLPTR);
     Client::~Client();
-    static std::shared_mutex _staticSendImageMutex;
 
 private slots:
     void buttonSendImageClicked();
@@ -31,5 +30,4 @@ private:
     void sender(QPixmap image);
 
     Ui::ClientClass _ui;
-    std::mutex _appendLocker;
 };

@@ -1,7 +1,5 @@
 #include "Client.h"
 
-std::shared_mutex Client::_staticSendImageMutex;
-
 
 Client::Client(QWidget *parent) : QMainWindow(parent)
 {
@@ -36,8 +34,6 @@ void Client::buttonDisplayImageClicked() {
 }
 
 void Client::sender(QPixmap image) {
-    std::lock_guard<std::shared_mutex> lock(Client::_staticSendImageMutex);
-
     //From QPixmap TO QByteArray
     QByteArray bytesArray;
     QBuffer buffer(&bytesArray);
@@ -115,7 +111,6 @@ void Client::buttonSendImageClicked() {
 }
 
 void Client::showAppendInTextEdit(const QString& message) {
-    std::lock_guard<std::mutex> appendLocker(_appendLocker);
     _ui.textEdit->append(message);
 }
 
